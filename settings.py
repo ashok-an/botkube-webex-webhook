@@ -1,13 +1,18 @@
 import os
+import sys
 
 from dotenv import load_dotenv
 load_dotenv()
 
-bot_email = os.getenv("TEAMS_BOT_EMAIL")
-teams_token = os.getenv("TEAMS_BOT_TOKEN")
-bot_url = os.getenv("TEAMS_BOT_URL")
-bot_app_name = os.getenv("TEAMS_BOT_APP_NAME")
-bot_message_to = os.getenv("TEAMS_BOT_MESSAGE_TO")
+teams_token = os.getenv("TEAMS_BOT_TOKEN", "")
+room_id = os.getenv("TEAMS_ROOM_ID", "")
+
+try:
+    assert teams_token
+    assert room_id
+except AssertionError:
+    print("AssertionError: Unable to get value for environment variables: [TEAMS_BOT_TOKEN, TEAMS_ROOM_ID]")
+    sys.exit(2)
 
 if __name__ == '__main__':
-    print(bot_email, teams_token, bot_url, bot_app_name)
+    print(teams_token, room_id)

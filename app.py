@@ -27,7 +27,7 @@ def webhook():
     if request.method == 'POST':
         # print("+ payload: {}".format(json.dumps(request.json, indent=4, sort_keys=True)))
         message = format_json_to_markdown(request.json)
-        teams_sdk.send_message_to_user(settings.bot_message_to, "```json\n{}\n```".format(message))
+        teams_sdk.send_message_to_room(settings.room_id, "```json\n{}\n```".format(message))
         return jsonify("Webhook received!")
 
     else:
