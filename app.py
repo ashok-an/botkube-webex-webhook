@@ -25,7 +25,7 @@ def format_json_to_markdown(_json):
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.method == 'POST':
-        print("+ payload: {}".format(json.dumps(request.json, indent=4, sort_keys=True)))
+        # print("+ payload: {}".format(json.dumps(request.json, indent=4, sort_keys=True)))
         message = format_json_to_markdown(request.json)
         teams_sdk.send_message_to_user(settings.bot_message_to, "```json\n{}\n```".format(message))
         return jsonify("Webhook received!")
@@ -42,4 +42,9 @@ def home():
 def ping():
     return jsonify({"message": "pong"})
 
-app.run(host='0.0.0.0', port=8000, debug=True)
+@app.route("/healthz", methods=['GET'])
+def health():
+    return jsonify({"health": "OK"})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000, debug=False)
