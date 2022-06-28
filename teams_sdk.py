@@ -9,7 +9,7 @@ def get_me():
 
 def send_message_to_user(user_id, message):
     toEmail = user_id + '@cisco.com'
-    api.messages.create(toPersonEmail=toEmail, markdown=message)
+    api.messages.create(toPersonEmail=toEmail, markdown=message, files=["https://www.webex.com/content/dam/wbx/us/images/dg-integ/teams_icon.png"])
     return
 
 def send_message_to_room(room_id, message):
@@ -48,7 +48,7 @@ def create_card(title, cluster, namespace, message):
     _json['content']['body'].append(factSet)
 
 
-    print("Message: {}".format(json.dumps(_json, sort_keys=True, indent=4)), flush=True)
+    #print("Message: {}".format(json.dumps(_json, sort_keys=True, indent=4)), flush=True)
     return _json
 
 if __name__ == '__main__':

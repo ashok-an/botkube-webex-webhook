@@ -1,9 +1,6 @@
 import os
 import sys
 
-from dotenv import load_dotenv
-load_dotenv()
-
 teams_token = os.getenv("TEAMS_BOT_TOKEN", "")
 try:
     assert teams_token
