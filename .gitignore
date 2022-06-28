@@ -5,6 +5,7 @@ __pycache__/
 
 .env
 venv/
+run.sh
 
 # C extensions
 *.so

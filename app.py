@@ -74,11 +74,12 @@ def webhook():
         details = status.get("messages", [])[0] if "messages" in status else ""
 
         if status_type == 'error':
-            app.logger.warning(f"Notifying event-type:{status} for namespace:{namespace}")
             room_id = get_room_id(namespace)
+            app.logger.warning(f"Notifying event-type:{status} for namespace:{namespace} to roomId:{room_id}")
             if room_id:
                 table = tabulate([['Cluster | Namespace', f"{cluster} | {namespace}"], ['Error', details]])
                 pre = f"🚩 Error in **{kind}/{name}**"
+                app.logger.warning(f"Sending notification for {kind}/{name} ...")
                 teams_sdk.send_message_to_room(room_id, f"{pre}\n```\n{table}\n```")
             else:
                 app.logger.error(f"No mapping found for namespace:{namespace}")
