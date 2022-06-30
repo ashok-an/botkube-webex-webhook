@@ -9,7 +9,7 @@ def get_me():
 
 def send_message_to_user(user_id, message):
     toEmail = user_id + '@cisco.com'
-    api.messages.create(toPersonEmail=toEmail, markdown=message, files=["https://www.webex.com/content/dam/wbx/us/images/dg-integ/teams_icon.png"])
+    api.messages.create(toPersonEmail=toEmail, markdown=message)
     return
 
 def send_message_to_room(room_id, message):
@@ -28,7 +28,7 @@ def send_card_to_room(room_id, card_obj, fallback_message='card creation failed'
     api.messages.create(roomId=room_id, attachments=[card_obj,], text=fallback_message)
     return
 
-def create_card(title, cluster, namespace, message):
+def create_card(title, cluster, namespace, timestamp, message):
     _json = {"contentType": "application/vnd.microsoft.card.adaptive",
         "content": {
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -44,7 +44,8 @@ def create_card(title, cluster, namespace, message):
     factSet = {"type": "FactSet", "facts": []}
     factSet['facts'].append({'title': 'Cluster', 'value': cluster})
     factSet['facts'].append({'title': 'Namespace', 'value': namespace})
-    factSet['facts'].append({'title': 'Details', 'value': message})
+    factSet['facts'].append({'title': 'Summary', 'value': message})
+    factSet['facts'].append({'title': 'Timestamp', 'value': timestamp})
     _json['content']['body'].append(factSet)
 
 

@@ -28,8 +28,8 @@ class RequestFormatter(logging.Formatter):
         return super().format(record)
 
 formatter = RequestFormatter(
-    '[%(asctime)s] %(remote_addr)s requested %(url)s\n\t'
-    '%(levelname)s in %(module)s: %(message)s'
+    '[%(asctime)s] %(remote_addr)s | %(url)s\n + '
+    '%(levelname)s - %(message)s'
 )
 default_handler.setFormatter(formatter)
 default_handler.setLevel(logging.INFO)
@@ -37,17 +37,18 @@ default_handler.setLevel(logging.INFO)
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 
-def get_room_mapping(lookup_dir="/tmp/lookup_table"):
+def get_room_mapping(json_path="/tmp/lookup_table/mapping.json"):
     try:
-        sys.path.append(lookup_dir)
-        import lookup_table
-        return lookup_table.room_mapping
+        with open(json_path, 'r') as fp:
+            return json.load(fp)
     except Exception as e:
-        print(f"Exception: get_room_mapping failed; error : {e}")
+        print(f"Exception: get_room_mapping failed; error: {e}")
         sys.exit(3)
 
+# need to do this once else api call times out
+mapping = get_room_mapping()
+
 def get_room_id(namespace):
-    mapping = get_room_mapping()
     for k, v in mapping.items():
         m = re.search(k, namespace, re.IGNORECASE)
         if m and m.group(0):
@@ -73,14 +74,16 @@ def webhook():
         details = _json.get("summary", "") if "summary" in _json else ""
         details = status.get("messages", [])[0] if "messages" in status else ""
 
+        timestamp = _json.get("timestamp", "")
+
         if status_type == 'error':
             room_id = get_room_id(namespace)
             app.logger.warning(f"Notifying event-type:{status} for namespace:{namespace} to roomId:{room_id}")
             if room_id:
-                table = tabulate([['Cluster | Namespace', f"{cluster} | {namespace}"], ['Error', details]])
-                pre = f"🚩 Error in **{kind}/{name}**"
+                pre = f"🚩 Error in {kind}/{name}"
                 app.logger.warning(f"Sending notification for {kind}/{name} ...")
-                teams_sdk.send_message_to_room(room_id, f"{pre}\n```\n{table}\n```")
+                card = teams_sdk.create_card(pre, cluster, namespace, timestamp, details)
+                teams_sdk.send_card_to_room(room_id, card, f"Error in {cluster}/{namespace}/{kind}/{name} - {details}")
             else:
                 app.logger.error(f"No mapping found for namespace:{namespace}")
         else:
