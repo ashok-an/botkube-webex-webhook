@@ -7,7 +7,6 @@ import sys
 from flask import Flask, request, jsonify
 from flask import has_request_context, request
 from flask.logging import default_handler
-import re
 
 from faker import Faker
 fake = Faker()
@@ -37,7 +36,6 @@ default_handler.setLevel(logging.INFO)
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
-logging.basicConfig(filename='record.log', level=logging.WARNING, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 def get_room_mapping(json_path="/tmp/lookup_table/mapping.json"):
     try:
@@ -72,20 +70,13 @@ def webhook():
 
         status = _json.get('status', {})
         status_type = status.get('type', 'no-type')
-        status_level = status.get('level', 'no-level')
 
         details = _json.get("summary", "") if "summary" in _json else ""
         details = status.get("messages", [])[0] if "messages" in status else ""
-        check_liveness = re.match("Liveness probe failed: Get \".*\": context deadline exceeded", details)
-        check_readiness = re.match("Readiness probe failed: Get \".*\": context deadline exceeded", details)
 
         timestamp = _json.get("timestamp", "")
-        if details == "Liveness prob failed:" or details == "Readiness probe failed:":
-            app.logger.error (f"Ignoted payload: {details}")
-        elif check_liveness or check_readiness:
-            app.logger.error(f"Ignoted payload: {details}")
-        elif status_level == 'critical' or status_type == 'error':
-            print("hello")
+
+        if status_type == 'error':
             room_id = get_room_id(namespace)
             app.logger.warning(f"Notifying event-type:{status} for namespace:{namespace} to roomId:{room_id}")
             if room_id:
