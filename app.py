@@ -85,7 +85,6 @@ def webhook():
         elif check_liveness or check_readiness:
             app.logger.error(f"Ignoted payload: {details}")
         elif status_level == 'critical' or status_type == 'error':
-            print("hello")
             room_id = get_room_id(namespace)
             app.logger.warning(f"Notifying event-type:{status} for namespace:{namespace} to roomId:{room_id}")
             if room_id:
